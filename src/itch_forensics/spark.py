@@ -1,13 +1,17 @@
+import os
+import sys
 import pathlib
 
 from pyspark.sql import SparkSession
 
 SQL_DIR = pathlib.Path(__file__).resolve().parents[2] / "sql"
-TABLES = ["messages", "add_order", "execution", "cancel", "delete", "replace", "trade", "cross", "noii", "directory"]
+TABLES = ["messages", "add_order", "execution", "cancel", "delete", "replace", "trade", "cross", "noii", "directory", "trading_action"]
 
 
-def get_spark(app="itch", shuffle_partitions=16):
-    return (SparkSession.builder.master("local[*]").appName(app)
+def get_spark(app="itch", shuffle_partitions=16, cores="*"):
+    # Python workers must use the same interpreter (and so the same installed package) as the driver
+    os.environ.setdefault("PYSPARK_PYTHON", sys.executable)
+    return (SparkSession.builder.master(f"local[{cores}]").appName(app)
             .config("spark.driver.memory", "3g").config("spark.sql.shuffle.partitions", shuffle_partitions)
             .config("spark.sql.session.timeZone", "UTC").config("spark.ui.showConsoleProgress", "false")
             .getOrCreate())
