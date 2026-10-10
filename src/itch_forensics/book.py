@@ -11,6 +11,9 @@ from collections import Counter, defaultdict
 import numpy as np
 import pandas as pd
 
+ANOMALIES = ("add_duplicate_ref", "exec_unknown_ref", "cancel_unknown_ref", "delete_unknown_ref",
+             "replace_unknown_ref", "replace_new_ref_collision", "exec_over_remaining",
+             "cancel_over_remaining", "locate_mismatch", "negative_level")
 KIND = {"A": 0, "F": 0, "E": 1, "C": 2, "X": 3, "D": 4, "U": 5}
 BID, ASK = 0, 1
 
@@ -139,8 +142,14 @@ def replay(events: pd.DataFrame, monitored=(), keep_examples=5):
 
     book_total = sum(levels.values())
     order_total = sum(o[3] for o in orders.values())
+    live = defaultdict(lambda: [0, 0])
+    for o in orders.values():
+        live[o[0]][0] += 1
+        live[o[0]][1] += o[3]
+    by_locate = pd.DataFrame([(loc, n, s) for loc, (n, s) in live.items()],
+                             columns=["locate", "live_orders", "resting_shares"])
     state = {"live_orders": len(orders), "resting_shares_orders": order_total,
              "resting_shares_levels": book_total, "levels": len(levels),
-             "executed_by_locate": dict(executed)}
+             "executed_by_locate": dict(executed), "by_locate": by_locate}
     bbo_df = pd.DataFrame(bbo, columns=["seq", "ts_ns", "locate", "bid", "ask"])
     return dict(bad), dict(examples), bbo_df, state

@@ -38,7 +38,7 @@ def build(raw: pathlib.Path, out: pathlib.Path) -> dict:
         "execution": pd.concat([fr["E"].assign(printable=None, price=None).assign(type="E"),
                                 fr["C"].assign(type="C")], ignore_index=True).sort_values("seq"),
         "cancel": fr["X"], "delete": fr["D"], "replace": fr["U"], "trade": fr["P"],
-        "cross": fr["Q"], "noii": fr["I"], "directory": fr["R"],
+        "cross": fr["Q"], "noii": fr["I"], "directory": fr["R"], "trading_action": fr["H"],
     }
     counts = {}
     for name, df in tables.items():

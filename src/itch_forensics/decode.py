@@ -43,4 +43,5 @@ def decode(buf, idx: Index, msg_type: str) -> pd.DataFrame:
 
 
 def decode_all(buf, idx: Index, types=None) -> dict:
-    return {t: decode(buf, idx, t) for t in (types or LAYOUTS) if (idx.types == ord(t)).any()}
+    # every requested type is returned, as an empty table when the file has none of it
+    return {t: decode(buf, idx, t) for t in (types or LAYOUTS)}
